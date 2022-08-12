@@ -112,13 +112,17 @@ def get_algo_keys():
     
     # TODO: Generate or read (using the mnemonic secret) 
     # the algorand public/private keys
+    algo_sk = "18ppT/MQyz7nvq4ipbIEAOqA5lKrv4M+J09iHKU9tsAgDtPesktIeJ/67fB2KDk9qyAEQ8Xu/IOsqB/xHOaTeg=="
+    algo_pk = "EAHNHXVSJNEHRH725XYHMKBZHWVSABCDYXXPZA5MVAP7CHHGSN5GXM2VWM"
     
     return algo_sk, algo_pk
 
 
 def get_eth_keys(filename = "eth_mnemonic.txt"):
     w3 = Web3()
-    
+    eth_pk = "0x1BcA01B4E665FE11804b89A6e91d857D354aeC1F"  #eth address
+    eth_sk = b'\xad\\\xcb\x84-\xc2\xbf\xc0\xb1d\xf5\x82\x8e\x18kT\x906#\xd5\xbc\xdf|[\xeeK\xad\xc1\xf4\x98\xf5\xd6' #secret key
+
     # TODO: Generate or read (using the mnemonic secret) 
     # the ethereum public/private keys
 
@@ -209,8 +213,6 @@ def fill_order(order):
         sell_amount=calc_new_sell_amount(existing_order, order)) 
         
         process_child(child_order)
- 
-  
 def execute_txes(txes):
     if txes is None:
         return True
@@ -305,11 +307,14 @@ def trade():
              sell_amount = content["payload"]["sell_amount"],
              tx_id = content['payload']['tx_id']
         )
+
+        if order_obj.sell_currency  == "Ethereum":
+            tx = w3.eth.get_transaction(order_obj.tx_id)
+            if tx['to'] != get_eth_keys[1]:
+                return jsonify(False)
         g.session.add(order_obj)
         g.session.commit()
         # 3a. Check if the order is backed by a transaction equal to the sell_amount (this is new)
-        if order_obj.sell_currency  == "Ethereum":
-            tx = w3.eth.get_transaction(order_obj.tx_id)
 
         fill_order(order_obj)
         # 3b. Fill the order (as in Exchange Server II) if the order is valid
@@ -346,3 +351,4 @@ def order_book():
 
 if __name__ == '__main__':
     app.run(port='5002')
+
