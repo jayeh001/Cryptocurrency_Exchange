@@ -214,6 +214,9 @@ def fill_order(order):
         
         process_child(child_order)
 def execute_txes(txes):
+    """
+    requires: order_id,platform,sender_sk,
+    """
     if txes is None:
         return True
     if len(txes) == 0:
