@@ -51,6 +51,7 @@ def send_tokens_algo( acl, sender_sk, txes):
     for i,tx in enumerate(txes):
         params.first += 1
         send_amount = tx['amount']
+        print("AYOOOOOOOOOO THE TYPE OF SEND_AMOOUNT IS:" + type(send_amount))
         send_to_address = tx['receiver_pk']
         signed_tx = None
         print("WE MADE IT TO BEFORE PAYMENTTXN")
@@ -59,7 +60,7 @@ def send_tokens_algo( acl, sender_sk, txes):
             unsigned_tx = transaction.PaymentTxn(sender_pk, params, send_to_address, send_amount)
             print("WE MADE IT AFTER PAYMENTTXN")
             signed_tx = unsigned_tx.sign(sender_sk)
-            
+
             print(f"Sending {tx['amount']} microalgo from {sender_pk} to {tx['receiver_pk']}")
             # TODO: Send the transaction to the testnet
             acl.send_transaction(signed_tx)
