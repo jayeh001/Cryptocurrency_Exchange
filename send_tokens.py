@@ -56,16 +56,16 @@ def send_tokens_algo( acl, sender_sk, txes):
         signed_tx = unsigned_tx.sign(sender_sk)
 
         try:
-            print(f"Sending {tx['amount']} microalgo from {sender_pk} to {tx['receiver_pk']}" )
+            print(f"Sending {tx['amount']} microalgo from {sender_pk} to {tx['receiver_pk']}")
             # TODO: Send the transaction to the testnet
             acl.send_transaction(signed_tx)
             tx_id = signed_tx.transaction.get_tx_id()
             tx_ids.append(tx_id)
             txinfo = wait_for_confirmation_algo(acl, txid=tx_id )
-            print(f"Sent {tx['amount']} microalgo in transaction: {tx_id}\n" )
+            print(f"Sent {tx['amount']} microalgo in transaction: {tx_id}\n")
+            add_to_tx_table(tx,tx_id)
         except Exception as e:
             print(e)
-
     return tx_ids
 
 # Function from Algorand Inc.
