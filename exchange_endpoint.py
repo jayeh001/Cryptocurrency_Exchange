@@ -257,7 +257,8 @@ def execute_txes(txes):
 
     add_to_tx_table(algo_txes)
     add_to_tx_table(eth_txes)
-    
+    print("printing all TRANSACTIONS IN TX TABLE")
+    print(g.session.query(TX).all())
 def add_to_tx_table(txes):
     for tx in txes:
         print("WE ARE PRINTING TXES NOW")
