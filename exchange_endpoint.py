@@ -119,7 +119,7 @@ def get_algo_keys():
 
 
 def get_eth_keys(filename = "eth_mnemonic.txt"):
-    w3 = Web3()
+    # w3 = Web3()
     eth_pk = "0x1BcA01B4E665FE11804b89A6e91d857D354aeC1F"  #eth address
     eth_sk = b'\xad\\\xcb\x84-\xc2\xbf\xc0\xb1d\xf5\x82\x8e\x18kT\x906#\xd5\xbc\xdf|[\xeeK\xad\xc1\xf4\x98\xf5\xd6' #secret key
 
@@ -208,7 +208,7 @@ def fill_order(order,txes):
                     receiver_pk=order.receiver_pk, buy_currency=order.buy_currency, 
                     sell_currency=order.sell_currency, buy_amount=order.buy_amount - first_match.sell_amount, 
                     sell_amount=calc_new_sell_amount(order, first_match)) 
-        fill_order(child_order)
+        fill_order(child_order,txes)
 
     elif first_match.buy_amount > order.sell_amount:
         child_order = Order(creator_id=first_match.id,sender_pk=first_match.sender_pk,
@@ -216,7 +216,7 @@ def fill_order(order,txes):
                         sell_currency=first_match.sell_currency, 
                         buy_amount=first_match.buy_amount - order.sell_amount, 
                         sell_amount=calc_new_sell_amount(first_match, order)) 
-        fill_order(child_order)
+        fill_order(child_order,txes)
     return txes
 def create_txes(order):
     parameters = ["order_id", "platform", "receiver_pk", "amount"]
