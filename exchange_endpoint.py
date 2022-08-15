@@ -219,7 +219,8 @@ def fill_order(order,txes):
                         buy_amount=first_match.buy_amount - order.sell_amount, 
                         sell_amount=calc_new_sell_amount(first_match, order)) 
         fill_order(child_order,txes)
-    return txes
+    else:
+        return txes
 def create_txes(order):
     parameters = ["order_id", "platform", "receiver_pk", "amount"]
     #FIXME: platform might have to be buy_currency, and maybe buy_amount
@@ -256,11 +257,11 @@ def execute_txes(txes):
 
     add_to_tx_table(algo_txes)
     add_to_tx_table(eth_txes)
-
-    pass
-
+    
 def add_to_tx_table(txes):
     for tx in txes:
+        print("WE ARE PRINTING TXES NOW")
+        print(tx)
         new_tx_obj = TX(
             platform = tx['platform'],
             receiver_pk = tx['receiver_pk'],
@@ -326,7 +327,10 @@ def trade():
             )
             g.session.add(log_obj)
             g.session.commit()
-        
+            error = True
+        if error:
+            print (json.dumps(content))
+            return jsonify( False )
         # 1. Check the signature
         
         # 2. Add the order to the table
