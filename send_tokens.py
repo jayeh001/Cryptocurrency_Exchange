@@ -67,8 +67,8 @@ def send_tokens_algo( acl, sender_sk, txes):
             print(f"Sending {tx['amount']} microalgo from {sender_pk} to {tx['receiver_pk']}")
             # TODO: Send the transaction to the testnet
             acl.send_transaction(signed_tx)
-            tx_id = signed_tx.transaction.get_tx_id()
-            tx_ids.append(tx_id)
+            tx_id = signed_tx.transaction.get_txid()
+            # tx_ids.append(tx_id)
             txinfo = wait_for_confirmation_algo(acl, txid=tx_id )
             print(f"Sent {tx['amount']} microalgo in transaction: {tx_id}\n")
             tx['tx_id'] = tx_id
