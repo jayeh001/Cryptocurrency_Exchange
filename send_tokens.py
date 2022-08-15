@@ -4,6 +4,7 @@ from algosdk.v2client import algod
 from algosdk.v2client import indexer
 from algosdk import account
 from algosdk.future import transaction
+from models import Base, Order, TX, Log
 
 def connect_to_algo(connection_type=''):
     #Connect to Algorand node maintained by PureStake
@@ -44,13 +45,11 @@ def send_tokens_algo( acl, sender_sk, txes):
     #       - Create the Payment transaction 
     #       - Sign the transaction
     
-    # TODO: Return a list of transaction id's
-
     sender_pk = account.address_from_private_key(sender_sk)
-    send_to_address = addr #algo address 
     tx_ids = []
     for i,tx in enumerate(txes):
         send_amount = tx['amount']
+        send_to_address = tx['receiver_pk']
         unsigned_tx = transaction.PaymentTxn(sender_pk, fee, first_valid_round, last_valid_round, gh, send_to_address, send_amount, flat_fee=True)
 
         signed_tx = unsigned_tx.sign(sender_sk)
@@ -67,7 +66,6 @@ def send_tokens_algo( acl, sender_sk, txes):
         except Exception as e:
             print(e)
 
-    # return []
     return tx_ids
 
 # Function from Algorand Inc.
@@ -140,13 +138,37 @@ def wait_for_confirmation_eth(w3, tx_hash):
 def send_tokens_eth(w3,sender_sk,txes):
     sender_account = w3.eth.account.privateKeyToAccount(sender_sk)
     sender_pk = sender_account._address
-
+    nonce = w3.eth.get_transaction_count(sender_pk,"pending")
     # TODO: For each of the txes, sign and send them to the testnet
     # Make sure you track the nonce -locally-
     
     tx_ids = []
     for i,tx in enumerate(txes):
         # Your code here
-        continue
+        receiver_pk = tx['receiver_pk']
+        tx_amount = tx['amount']
+        txdict = {
+            'nonce':nonce + i,
+            'gasPrice': w3.eth.gas_price,
+            'gas': w3.eth.estimate_gas({'from': sender_pk, 'to': receiver_pk,'data':b'','amount': tx_amount }),
+            'to': receiver_pk,
+            'value': tx_amount,
+            'data': b''
+        }
+        signed_txn = w3.eth.account.sign_transaction(txdict,sender_sk)
+        tx_id = w3.eth.send_raw_transaction(signed_txn.rawTransaction)
+        receipt = wait_for_confirmation_eth(w3,tx_id)
+        add_to_tx_table(tx,tx_id)
+        tx_ids.append(tx_id)
 
     return tx_ids
+
+def add_to_tx_table(tx,txn_id):
+    new_tx_obj = TX(
+        platform = tx['platform'],
+        receiver_pk = tx['receiver_pk'],
+        order_id = tx['order_id'],
+        tx_id = txn_id
+    )
+    g.session.add(new_tx_obj)
+    g.session.commit()

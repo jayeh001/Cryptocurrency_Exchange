@@ -132,39 +132,39 @@ def calc_new_sell_amount(curr_order, other_order):
     print(ratio)
     return (curr_order.buy_amount - other_order.sell_amount) * ratio
     
-def process_child(order):
-    matches =  g.session.query(Order).filter(Order.buy_currency == order.sell_currency,
-                            Order.sell_currency == order.buy_currency,
-                            Order.filled == None,
-                            (Order.sell_amount / Order.buy_amount) >= (order.buy_amount / order.sell_amount))
-    g.session.add(order)
-    if not matches.first():
-        g.session.commit()
-        return
-    first_match = matches.first()
-    timestamp = datetime.now()
-    order.filled = timestamp
-    first_match.filled = timestamp
-    g.session.commit()
-    first_match.counterparty_id = order.id
-    order.counterparty_id = first_match.id
-    g.session.commit()
-    if order.buy_amount > first_match.sell_amount:
-        child_order = Order(creator_id=order.id,sender_pk=order.sender_pk,
-                    receiver_pk=order.receiver_pk, buy_currency=order.buy_currency, 
-                    sell_currency=order.sell_currency, buy_amount=order.buy_amount - first_match.sell_amount, 
-                    sell_amount=calc_new_sell_amount(order, first_match))     
-        process_child(order)
+# def process_child(order):
+#     matches =  g.session.query(Order).filter(Order.buy_currency == order.sell_currency,
+#                             Order.sell_currency == order.buy_currency,
+#                             Order.filled == None,
+#                             (Order.sell_amount / Order.buy_amount) >= (order.buy_amount / order.sell_amount))
+#     g.session.add(order)
+#     if not matches.first():
+#         g.session.commit()
+#         return
+#     first_match = matches.first()
+#     timestamp = datetime.now()
+#     order.filled = timestamp
+#     first_match.filled = timestamp
+#     g.session.commit()
+#     first_match.counterparty_id = order.id
+#     order.counterparty_id = first_match.id
+#     g.session.commit()
+#     if order.buy_amount > first_match.sell_amount:
+#         child_order = Order(creator_id=order.id,sender_pk=order.sender_pk,
+#                     receiver_pk=order.receiver_pk, buy_currency=order.buy_currency, 
+#                     sell_currency=order.sell_currency, buy_amount=order.buy_amount - first_match.sell_amount, 
+#                     sell_amount=calc_new_sell_amount(order, first_match))     
+#         process_child(order)
 
-    elif first_match.buy_amount > order.sell_amount:
-        child_order = Order(creator_id=first_match.id,sender_pk=first_match.sender_pk,
-        receiver_pk=first_match.receiver_pk, buy_currency=first_match.buy_currency, 
-        sell_currency=first_match.sell_currency, 
-        buy_amount=first_match.buy_amount - order.sell_amount, 
-        sell_amount=calc_new_sell_amount(first_match, order)) 
-        process_child(child_order)
+#     elif first_match.buy_amount > order.sell_amount:
+#         child_order = Order(creator_id=first_match.id,sender_pk=first_match.sender_pk,
+#         receiver_pk=first_match.receiver_pk, buy_currency=first_match.buy_currency, 
+#         sell_currency=first_match.sell_currency, 
+#         buy_amount=first_match.buy_amount - order.sell_amount, 
+#         sell_amount=calc_new_sell_amount(first_match, order)) 
+#         process_child(child_order)
   
-def fill_order(order):
+def fill_order(order,txes):
     
     # order = Order(sender_pk=order['sender_pk'],receiver_pk=order['receiver_pk'], 
     #                 buy_currency=order['buy_currency'], sell_currency=order['sell_currency'], 
@@ -178,45 +178,53 @@ def fill_order(order):
 
     # No matching orders found, so insert new order and terminate
     if not matching_orders.first():
-        # session.add(order)
-        # session.commit()
-        # print(session.query(Order).all())
         return
 
     # get first match
     
-    existing_order = matching_orders.first()
-    # print(existing_order.buy_currency)
+    first_match = matching_orders.first()
     timestamp = datetime.now()
     order.filled = timestamp
-    existing_order.filled = timestamp
+    first_match.filled = timestamp
     #commit to set ID 
     g.session.commit()
-    order.counterparty_id = existing_order.id
-    existing_order.counterparty_id = order.id
+    order.counterparty_id = first_match.id
+    first_match.counterparty_id = order.id
     g.session.commit()
     # print(session.query(Order).all())
-    
-    if order.buy_amount > existing_order.sell_amount:
+
+    #FIXME: create execute order here 
+    # parameters = ["order_id", "platform", "receiver_pk", "amount"]
+    # first_match_tx = dict(zip(parameters, create_txes(first_match)))
+    # order_tx = dict(zip(parameters,create_txes(order)))
+    first_match_tx = create_txes(first_match)
+    order_tx = create_txes(order)
+    txes.append(first_match_tx)
+    txes.append(order_tx)
+
+
+    if order.buy_amount > first_match.sell_amount:
         child_order = Order(creator_id=order.id,sender_pk=order.sender_pk,
                     receiver_pk=order.receiver_pk, buy_currency=order.buy_currency, 
-                    sell_currency=order.sell_currency, buy_amount=order.buy_amount - existing_order.sell_amount, 
-                    sell_amount=calc_new_sell_amount(order, existing_order)) 
-          
-        process_child(child_order)
+                    sell_currency=order.sell_currency, buy_amount=order.buy_amount - first_match.sell_amount, 
+                    sell_amount=calc_new_sell_amount(order, first_match)) 
+        fill_order(child_order)
 
-    elif existing_order.buy_amount > order.sell_amount:
-        child_order = Order(creator_id=existing_order.id,sender_pk=existing_order.sender_pk,
-        receiver_pk=existing_order.receiver_pk, buy_currency=existing_order.buy_currency, 
-        sell_currency=existing_order.sell_currency, 
-        buy_amount=existing_order.buy_amount - order.sell_amount, 
-        sell_amount=calc_new_sell_amount(existing_order, order)) 
-        
-        process_child(child_order)
+    elif first_match.buy_amount > order.sell_amount:
+        child_order = Order(creator_id=first_match.id,sender_pk=first_match.sender_pk,
+                        receiver_pk=first_match.receiver_pk, buy_currency=first_match.buy_currency, 
+                        sell_currency=first_match.sell_currency, 
+                        buy_amount=first_match.buy_amount - order.sell_amount, 
+                        sell_amount=calc_new_sell_amount(first_match, order)) 
+        fill_order(child_order)
+    return txes
+def create_txes(order):
+    parameters = ["order_id", "platform", "receiver_pk", "amount"]
+    matches = [order.id, order.sell_currency, order.receiver_pk, order.sell_amount]
+    return dict(zip(parameters,matches))
+    # return [order.id, order.sell_currency, order.receiver_pk, order.sell_amount]
 def execute_txes(txes):
-    """
-    requires: order_id,platform,sender_sk,
-    """
+    
     if txes is None:
         return True
     if len(txes) == 0:
@@ -237,6 +245,11 @@ def execute_txes(txes):
     #       1. Send tokens on the Algorand and eth testnets, appropriately
     #          We've provided the send_tokens_algo and send_tokens_eth skeleton methods in send_tokens.py
     #       2. Add all transactions to the TX table
+    acl = connect_to_algo("algodclient")
+    algo_txids = send_tokens_algo(acl, algo_sk, algo_txes)
+    
+    w3 = connect_to_eth()
+    eth_txids = send_tokens_eth(w3,eth_sk,eth_txes)
 
     pass
 
@@ -310,25 +323,32 @@ def trade():
              sell_amount = content["payload"]["sell_amount"],
              tx_id = content['payload']['tx_id']
         )
-
-        if order_obj.sell_currency  == "Ethereum":
-            tx = w3.eth.get_transaction(order_obj.tx_id)
-            if tx['to'] != get_eth_keys[1]:
-                return jsonify(False)
-        g.session.add(order_obj)
-        g.session.commit()
+        #FIXME: dunno if i actually implement this part
         # 3a. Check if the order is backed by a transaction equal to the sell_amount (this is new)
 
-        fill_order(order_obj)
+        # if order_obj.sell_currency  == "Ethereum":
+        #     tx = w3.eth.get_transaction(order_obj.tx_id)
+        #     if tx['to'] != get_eth_keys[1]:
+        #         return jsonify(False)
+        g.session.add(order_obj)
+        g.session.commit()
+        txes = []
         # 3b. Fill the order (as in Exchange Server II) if the order is valid
-        
+        final_txes = fill_order(order_obj,txes)
         # 4. Execute the transactions
-        
+        execute_txes(final_txes)
         # If all goes well, return jsonify(True). else return jsonify(False)
         return jsonify(True)
 
 @app.route('/order_book')
+
 def order_book():
+    """
+    FIXME:
+    return list of all orders in database. FORMAT as JSON
+    must contain tx_id of payment sent by MY server
+
+    """
     fields = [ "buy_currency", "sell_currency", "buy_amount", "sell_amount", "signature", "tx_id", "receiver_pk", "sender_pk" ]
     data = {}
     result = []
