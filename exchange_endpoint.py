@@ -257,15 +257,16 @@ def execute_txes(txes):
 
     pass
 
-def add_to_tx_table(tx):
-    new_tx_obj = TX(
-        platform = tx['platform'],
-        receiver_pk = tx['receiver_pk'],
-        order_id = tx['order_id'],
-        tx_id = tx['tx_id']
-    )
-    g.session.add(new_tx_obj)
-    g.session.commit()
+def add_to_tx_table(txes):
+    for tx in txes:
+        new_tx_obj = TX(
+            platform = tx['platform'],
+            receiver_pk = tx['receiver_pk'],
+            order_id = tx['order_id'],
+            tx_id = tx['tx_id']
+        )
+        g.session.add(new_tx_obj)
+        g.session.commit()
 
 """ End of Helper methods"""
   
