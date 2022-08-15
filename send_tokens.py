@@ -51,7 +51,8 @@ def send_tokens_algo( acl, sender_sk, txes):
     for i,tx in enumerate(txes):
         params.first += 1
         send_amount = tx['amount']
-        print("AYOOOOOOOOOO THE TYPE OF SEND_AMOOUNT IS:" + type(send_amount))
+        print("AYOOOOOOOOOO THE TYPE OF SEND_AMOOUNT IS:")
+        print(type(send_amount))
         send_to_address = tx['receiver_pk']
         signed_tx = None
         print("WE MADE IT TO BEFORE PAYMENTTXN")
