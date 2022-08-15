@@ -33,8 +33,8 @@ def connect_to_algo(connection_type=''):
 
 def send_tokens_algo( acl, sender_sk, txes):
     params = acl.suggested_params()
-    print("THESE ARE PARAMS:")
-    print(params)
+    # print("THESE ARE PARAMS:")
+    # print(params)
     # TODO: You might want to adjust the first/last valid rounds in the suggested_params
     #       See guide for details
     # gh = params.gh
@@ -53,11 +53,11 @@ def send_tokens_algo( acl, sender_sk, txes):
         send_amount = int(tx['amount'])
         send_to_address = tx['receiver_pk']
         signed_tx = None
-        print("WE MADE IT TO BEFORE PAYMENTTXN")
+        # print("WE MADE IT TO BEFORE PAYMENTTXN")
         # unsigned_tx = transaction.PaymentTxn(sender_pk, fee, first_valid_round, last_valid_round, gh, send_to_address, send_amount,flat_fee=True)
         try:
             unsigned_tx = transaction.PaymentTxn(sender_pk, params, send_to_address, send_amount)
-            print("WE MADE IT AFTER PAYMENTTXN")
+            # print("WE MADE IT AFTER PAYMENTTXN")
             signed_tx = unsigned_tx.sign(sender_sk)
 
             print(f"Sending {tx['amount']} microalgo from {sender_pk} to {tx['receiver_pk']}")
