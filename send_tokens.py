@@ -32,7 +32,7 @@ def connect_to_algo(connection_type=''):
         return algodclient
 
 def send_tokens_algo( acl, sender_sk, txes):
-    params = acl.Suggested_Params()
+    params = acl.suggested_params()
     print("THESE ARE PARAMS:")
     print(params)
     # TODO: You might want to adjust the first/last valid rounds in the suggested_params
