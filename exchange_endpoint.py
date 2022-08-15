@@ -220,7 +220,8 @@ def fill_order(order,txes):
     return txes
 def create_txes(order):
     parameters = ["order_id", "platform", "receiver_pk", "amount"]
-    matches = [order.id, order.sell_currency, order.receiver_pk, order.sell_amount]
+    #FIXME: platform might have to be buy_currency
+    matches = [order.id, order.buy_currency, order.receiver_pk, order.sell_amount]
     return dict(zip(parameters,matches))
     # return [order.id, order.sell_currency, order.receiver_pk, order.sell_amount]
 def execute_txes(txes):
