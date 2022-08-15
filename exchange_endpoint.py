@@ -186,6 +186,8 @@ def fill_order(order,txes):
     timestamp = datetime.now()
     order.filled = timestamp
     first_match.filled = timestamp
+    print("ORDER BEING FILLED NOW")
+    print(order.filled)
     #commit to set ID 
     g.session.commit()
     order.counterparty_id = first_match.id
