@@ -33,13 +33,14 @@ def connect_to_algo(connection_type=''):
 
 def send_tokens_algo( acl, sender_sk, txes):
     params = acl.suggested_params()
-    
+    print("THESE ARE PARAMS:")
+    print(params)
     # TODO: You might want to adjust the first/last valid rounds in the suggested_params
     #       See guide for details
-    # gh = params.gh
-    # first_valid_round = params.first
-    # last_valid_round = params.last
-    # fee = params.min_fee
+    gh = params.gh
+    first_valid_round = params.first
+    last_valid_round = params.last
+    fee = params.min_fee
     
     # TODO: For each transaction, do the following:
     #       - Create the Payment transaction 
@@ -53,7 +54,9 @@ def send_tokens_algo( acl, sender_sk, txes):
         send_to_address = tx['receiver_pk']
         
         # unsigned_tx = transaction.PaymentTxn(sender_pk, fee, first_valid_round, last_valid_round, gh, send_to_address, send_amount, flat_fee=True)
+        print("WE MADE IT TO BEFORE PAYMENTTXN")
         unsigned_tx = transaction.PaymentTxn(sender_pk, params, send_to_address, send_amount)
+        print("WE MADE IT AFTER PAYMENTTXN")
         signed_tx = unsigned_tx.sign(sender_sk)
 
         try:
