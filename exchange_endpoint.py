@@ -381,7 +381,8 @@ def order_book():
         }
         result.append(row)
     # data["data"] = result
-    print(result)
+    # print("asfwtf WTF ")
+    # print(result)
     return jsonify(result)
 
     # Same as before
