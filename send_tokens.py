@@ -48,15 +48,15 @@ def send_tokens_algo( acl, sender_sk, txes):
     sender_pk = account.address_from_private_key(sender_sk)
     tx_ids = []
     for i,tx in enumerate(txes):
+        params.first += 1
         send_amount = tx['amount']
         send_to_address = tx['receiver_pk']
-        unsigned_tx = transaction.PaymentTxn(sender_pk, fee, first_valid_round, last_valid_round, gh, send_to_address, send_amount, flat_fee=True)
-
+        # unsigned_tx = transaction.PaymentTxn(sender_pk, fee, first_valid_round, last_valid_round, gh, send_to_address, send_amount, flat_fee=True)
+        unsigned_tx = transaction.PaymentTxn(sender_pk, params, send_to_address, send_amount)
         signed_tx = unsigned_tx.sign(sender_sk)
 
         try:
             print(f"Sending {tx['amount']} microalgo from {sender_pk} to {tx['receiver_pk']}" )
-            
             # TODO: Send the transaction to the testnet
             acl.send_transaction(signed_tx)
             tx_id = signed_tx.transaction.get_tx_id()
