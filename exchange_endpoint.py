@@ -367,7 +367,7 @@ def order_book():
 
     """
     fields = [ "buy_currency", "sell_currency", "buy_amount", "sell_amount", "signature", "tx_id", "receiver_pk", "sender_pk" ]
-    # data = {}
+    data = {}
     result = []
     returned_orders = g.session.query(Order).all()
     for order in returned_orders:
@@ -382,10 +382,10 @@ def order_book():
             "tx_id": order.tx_id
         }
         result.append(row)
-    # data["data"] = result
+    data["data"] = result
     # print("asfwtf WTF ")
     # print(result)
-    return jsonify(result)
+    return jsonify(data)
 
     # Same as before
     pass
