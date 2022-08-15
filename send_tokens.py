@@ -52,18 +52,14 @@ def send_tokens_algo( acl, sender_sk, txes):
         params.first += 1
         send_amount = tx['amount']
         send_to_address = tx['receiver_pk']
-        
+        signed_tx = None
         print("WE MADE IT TO BEFORE PAYMENTTXN")
         # unsigned_tx = transaction.PaymentTxn(sender_pk, fee, first_valid_round, last_valid_round, gh, send_to_address, send_amount,flat_fee=True)
         try:
             unsigned_tx = transaction.PaymentTxn(sender_pk, params, send_to_address, send_amount)
             print("WE MADE IT AFTER PAYMENTTXN")
             signed_tx = unsigned_tx.sign(sender_sk)
-        except Exception as e:
-            import traceback
-            print(traceback.format_exc())
-            print(e)
-        try:
+            
             print(f"Sending {tx['amount']} microalgo from {sender_pk} to {tx['receiver_pk']}")
             # TODO: Send the transaction to the testnet
             acl.send_transaction(signed_tx)
@@ -74,6 +70,8 @@ def send_tokens_algo( acl, sender_sk, txes):
             tx['tx_id'] = tx_id
             # add_to_tx_table(tx,tx_id)
         except Exception as e:
+            import traceback
+            print(traceback.format_exc())
             print(e)
     return txes
 
