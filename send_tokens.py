@@ -50,7 +50,7 @@ def send_tokens_algo( acl, sender_sk, txes):
     # tx_ids = []
     for i,tx in enumerate(txes):
         params.first += 1
-        send_amount = tx['amount']
+        send_amount = int(tx['amount'])
         print("AYOOOOOOOOOO THE TYPE OF SEND_AMOOUNT IS:")
         print(type(send_amount))
         send_to_address = tx['receiver_pk']
