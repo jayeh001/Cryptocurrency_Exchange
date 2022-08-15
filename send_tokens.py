@@ -47,7 +47,7 @@ def send_tokens_algo( acl, sender_sk, txes):
     #       - Sign the transaction
     
     sender_pk = account.address_from_private_key(sender_sk)
-    tx_ids = []
+    # tx_ids = []
     for i,tx in enumerate(txes):
         params.first += 1
         send_amount = tx['amount']
@@ -71,10 +71,11 @@ def send_tokens_algo( acl, sender_sk, txes):
             tx_ids.append(tx_id)
             txinfo = wait_for_confirmation_algo(acl, txid=tx_id )
             print(f"Sent {tx['amount']} microalgo in transaction: {tx_id}\n")
-            add_to_tx_table(tx,tx_id)
+            tx['tx_id'] = tx_id
+            # add_to_tx_table(tx,tx_id)
         except Exception as e:
             print(e)
-    return tx_ids
+    return txes
 
 # Function from Algorand Inc.
 def wait_for_confirmation_algo(client, txid):
@@ -150,7 +151,7 @@ def send_tokens_eth(w3,sender_sk,txes):
     # TODO: For each of the txes, sign and send them to the testnet
     # Make sure you track the nonce -locally-
     
-    tx_ids = []
+    # tx_ids = []
     for i,tx in enumerate(txes):
         # Your code here
         receiver_pk = tx['receiver_pk']
@@ -166,17 +167,17 @@ def send_tokens_eth(w3,sender_sk,txes):
         signed_txn = w3.eth.account.sign_transaction(txdict,sender_sk)
         tx_id = w3.eth.send_raw_transaction(signed_txn.rawTransaction)
         receipt = wait_for_confirmation_eth(w3,tx_id)
-        add_to_tx_table(tx,tx_id)
-        tx_ids.append(tx_id)
+        tx['tx_id'] = tx_id
+        # tx_ids.append(tx_id)
 
-    return tx_ids
+    return txes
 
-def add_to_tx_table(tx,txn_id):
-    new_tx_obj = TX(
-        platform = tx['platform'],
-        receiver_pk = tx['receiver_pk'],
-        order_id = tx['order_id'],
-        tx_id = txn_id
-    )
-    g.session.add(new_tx_obj)
-    g.session.commit()
+# def add_to_tx_table(tx,txn_id):
+#     new_tx_obj = TX(
+#         platform = tx['platform'],
+#         receiver_pk = tx['receiver_pk'],
+#         order_id = tx['order_id'],
+#         tx_id = txn_id
+#     )
+#     g.session.add(new_tx_obj)
+#     g.session.commit()

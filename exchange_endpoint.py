@@ -247,12 +247,25 @@ def execute_txes(txes):
     #          We've provided the send_tokens_algo and send_tokens_eth skeleton methods in send_tokens.py
     #       2. Add all transactions to the TX table
     acl = connect_to_algo("algodclient")
-    algo_txids = send_tokens_algo(acl, algo_sk, algo_txes)
+    algo_txes = send_tokens_algo(acl, algo_sk, algo_txes)
     
     w3 = connect_to_eth()
-    eth_txids = send_tokens_eth(w3,eth_sk,eth_txes)
+    eth_txes = send_tokens_eth(w3,eth_sk,eth_txes)
+
+    add_to_tx_table(algo_txes)
+    add_to_tx_table(eth_txes)
 
     pass
+
+def add_to_tx_table(tx):
+    new_tx_obj = TX(
+        platform = tx['platform'],
+        receiver_pk = tx['receiver_pk'],
+        order_id = tx['order_id'],
+        tx_id = tx['tx_id']
+    )
+    g.session.add(new_tx_obj)
+    g.session.commit()
 
 """ End of Helper methods"""
   
