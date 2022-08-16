@@ -179,7 +179,9 @@ def fill_order(order,txes):
     # No matching orders found, so insert new order and terminate
     if not matching_orders.first():
         print('LEAVING FILL ORDER FUNCTION. NO MATCHING ORDERS')
-        return
+        print('printing txes below')
+        print(txes)
+        return txes
 
     # get first match
     
@@ -213,7 +215,7 @@ def fill_order(order,txes):
                     receiver_pk=order.receiver_pk, buy_currency=order.buy_currency, 
                     sell_currency=order.sell_currency, buy_amount=order.buy_amount - first_match.sell_amount, 
                     sell_amount=calc_new_sell_amount(order, first_match)) 
-        fill_order(child_order,txes)
+        return fill_order(child_order,txes)
 
     elif first_match.buy_amount > order.sell_amount:
         print('creating child order')
@@ -222,12 +224,12 @@ def fill_order(order,txes):
                         sell_currency=first_match.sell_currency, 
                         buy_amount=first_match.buy_amount - order.sell_amount, 
                         sell_amount=calc_new_sell_amount(first_match, order)) 
-        fill_order(child_order,txes)
-    else:
-        print('LEAVING FILL ORDER FUNCTION')
-        print('PRINTING TXes BELOW')
-        print(txes)
-        return txes
+        return fill_order(child_order,txes)
+    
+    print('LEAVING FILL ORDER FUNCTION')
+    print('PRINTING TXes BELOW')
+    print(txes)
+    return txes
 def create_txes(order):
     print('ENTERED CREATE TX')
     parameters = ["order_id", "platform", "receiver_pk", "amount"]
