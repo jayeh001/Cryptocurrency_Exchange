@@ -203,7 +203,7 @@ def fill_order(order,txes):
     order_tx = create_txes(order)
     txes.append(first_match_tx)
     txes.append(order_tx)
-
+    g.session.commit()
 
     if order.buy_amount > first_match.sell_amount:
         child_order = Order(creator_id=order.id,sender_pk=order.sender_pk,
@@ -224,6 +224,7 @@ def fill_order(order,txes):
 def create_txes(order):
     parameters = ["order_id", "platform", "receiver_pk", "amount"]
     #FIXME: platform might have to be buy_currency, and maybe buy_amount
+
     matches = [order.id, order.buy_currency, order.receiver_pk, order.buy_amount]
     print("THIS IS THE MATCHES IN CREATE_TX")
     print(matches)
@@ -276,7 +277,7 @@ def add_to_tx_table(txes):
         )
         g.session.add(new_tx_obj)
         g.session.commit()
-        checkboy = g.session.query(TX).filter(TX.order_id ==  )
+        # checkboy = g.session.query(TX).filter(TX.order_id ==  )
 
 """ End of Helper methods"""
   
@@ -328,6 +329,7 @@ def trade():
             return jsonify( False )
         
         # Your code here
+        error = False
         if not check_sig(content['payload'], content['sig']):
             log_obj = Log(
                 message = json.dumps(content['payload'])
@@ -336,6 +338,7 @@ def trade():
             g.session.commit()
             error = True
         if error:
+            print('THERE WAS AN ERROR IN CHECK SIG')
             print (json.dumps(content))
             return jsonify( False )
         # 1. Check the signature
@@ -405,6 +408,8 @@ def order_book():
         }
         result.append(row)
     data["data"] = result
+    print('THIS IS THE DATATTAAAAAAAA')
+    # print(data)
     # print("asfwtf WTF ")
     # print(result)
     return jsonify(data)
