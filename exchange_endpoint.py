@@ -263,8 +263,8 @@ def execute_txes(txes):
 
     add_to_tx_table(algo_txes)
     add_to_tx_table(eth_txes)
-    print("printing all TRANSACTIONS IN TX TABLE")
-    print(g.session.query(TX).all())
+    # print("printing all TRANSACTIONS IN TX TABLE")
+    # print(g.session.query(TX).all())
 def add_to_tx_table(txes):
     for tx in txes:
         # print("WE ARE PRINTING TXES NOW")
@@ -411,7 +411,7 @@ def order_book():
         }
         result.append(row)
     data["data"] = result
-    print('THIS IS THE DATATTAAAAAAAA')
+    # print('THIS IS THE DATATTAAAAAAAA')
     # print(data)
     # print("asfwtf WTF ")
     # print(result)
