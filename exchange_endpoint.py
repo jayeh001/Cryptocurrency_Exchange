@@ -208,6 +208,7 @@ def fill_order(order,txes):
     g.session.commit()
 
     if order.buy_amount > first_match.sell_amount:
+        print('creating child order')
         child_order = Order(creator_id=order.id,sender_pk=order.sender_pk,
                     receiver_pk=order.receiver_pk, buy_currency=order.buy_currency, 
                     sell_currency=order.sell_currency, buy_amount=order.buy_amount - first_match.sell_amount, 
@@ -215,6 +216,7 @@ def fill_order(order,txes):
         fill_order(child_order,txes)
 
     elif first_match.buy_amount > order.sell_amount:
+        print('creating child order')
         child_order = Order(creator_id=first_match.id,sender_pk=first_match.sender_pk,
                         receiver_pk=first_match.receiver_pk, buy_currency=first_match.buy_currency, 
                         sell_currency=first_match.sell_currency, 
@@ -223,6 +225,8 @@ def fill_order(order,txes):
         fill_order(child_order,txes)
     else:
         print('LEAVING FILL ORDER FUNCTION')
+        print('PRINTING TXes BELOW')
+        print(txes)
         return txes
 def create_txes(order):
     print('ENTERED CREATE TX')
