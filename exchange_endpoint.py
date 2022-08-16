@@ -221,8 +221,10 @@ def fill_order(order,txes):
                         sell_amount=calc_new_sell_amount(first_match, order)) 
         fill_order(child_order,txes)
     else:
+        print('LEAVING FILL ORDER FUNCTION')
         return txes
 def create_txes(order):
+    print('ENTERED CREATE TX')
     parameters = ["order_id", "platform", "receiver_pk", "amount"]
     #FIXME: platform might have to be buy_currency, and maybe buy_amount
 
@@ -235,7 +237,7 @@ def create_txes(order):
     return output
     # return [order.id, order.sell_currency, order.receiver_pk, order.sell_amount]
 def execute_txes(txes):
-    
+    print('ENTERING EXECUTE TXES FUNCTION')
     if txes is None:
         print('txes IS NONE')
         return True
