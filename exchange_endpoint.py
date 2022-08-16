@@ -322,6 +322,7 @@ def trade():
             return jsonify( False )
         
         # Your code here
+        error = False
         if not check_sig(content['payload'], content['sig']):
             log_obj = Log(
                 message = json.dumps(content['payload'])
@@ -330,6 +331,7 @@ def trade():
             g.session.commit()
             error = True
         if error:
+            print('THERE WAS AN ERROR IN CHECK SIG')
             print (json.dumps(content))
             return jsonify( False )
         # 1. Check the signature
