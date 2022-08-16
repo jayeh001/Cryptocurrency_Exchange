@@ -282,6 +282,10 @@ def add_to_tx_table(txes):
         g.session.add(new_tx_obj)
         g.session.commit()
         checkboy = g.session.query(TX).filter(TX.order_id ==  tx['order_id'])
+        print("type of tx")
+
+        print(type(tx))
+
         theorderid = tx['order_id']
         print(f'TX DATABASE RETURNED {checkboy.count()} order(s) that matchd txid: {theorderid}')
 
