@@ -226,8 +226,8 @@ def create_txes(order):
     #FIXME: platform might have to be buy_currency, and maybe buy_amount
 
     matches = [order.id, order.buy_currency, order.receiver_pk, order.buy_amount]
-    print("THIS IS THE MATCHES IN CREATE_TX")
-    print(matches)
+    # print("THIS IS THE MATCHES IN CREATE_TX")
+    # print(matches)
     output = dict(zip(parameters,matches))
     print('THIS IS TX OBJECT BEING CREATED')
     print(output)
@@ -236,8 +236,10 @@ def create_txes(order):
 def execute_txes(txes):
     
     if txes is None:
+        print('txes IS NONE')
         return True
     if len(txes) == 0:
+        print('TXES LENGTH IS 0')
         return True
     print( f"Trying to execute {len(txes)} transactions" )
     print( f"IDs = {[tx['order_id'] for tx in txes]}" )
@@ -280,7 +282,7 @@ def add_to_tx_table(txes):
         g.session.add(new_tx_obj)
         g.session.commit()
         checkboy = g.session.query(TX).filter(TX.order_id ==  tx['order_id'])
-        print(f'CHECKBOY IS {checkboy}')
+        print(f'CHECKBOY.ORDERID IS {checkboy.order_id}')
 
 """ End of Helper methods"""
   
