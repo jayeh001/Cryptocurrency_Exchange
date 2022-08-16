@@ -373,10 +373,10 @@ def trade():
         execute_txes(final_txes)
         
         #################################
-        checks = g.session.query(Order).filter(Order.filled != None)
-        for check in checks:
-            txcheck = g.session.query(TX).filter(TX.order_id == check.id)
-            if not txcheck or txcheck.count() == 0:
+        # checks = g.session.query(Order).filter(Order.filled != None)
+        # for check in checks:
+        #     txcheck = g.session.query(TX).filter(TX.order_id == check.id)
+        #     if not txcheck or txcheck.count() == 0:
                 # print("##############################")
                 # print(f"{check.id} was not put inside TX TABLE")
                 # print("##############################")
