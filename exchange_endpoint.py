@@ -165,7 +165,7 @@ def calc_new_sell_amount(curr_order, other_order):
 #         process_child(child_order)
   
 def fill_order(order,txes):
-    
+    print('ENTERED FILL ORDER FUNCTION')
     # order = Order(sender_pk=order['sender_pk'],receiver_pk=order['receiver_pk'], 
     #                 buy_currency=order['buy_currency'], sell_currency=order['sell_currency'], 
     #                 buy_amount=order['buy_amount'], sell_amount=order['sell_amount'])

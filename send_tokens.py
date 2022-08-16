@@ -171,6 +171,8 @@ def send_tokens_eth(w3,sender_sk,txes):
         tx_id = w3.eth.send_raw_transaction(signed_txn.rawTransaction)
         receipt = wait_for_confirmation_eth(w3,tx_id)
         tx['tx_id'] = tx_id
+        checkingid = tx['tx_id']
+        print(f'CURRENTLY INSIDE SEND ETH. THE ORDER ID: {checkingid}')
         # tx_ids.append(tx_id)
 
     return txes
