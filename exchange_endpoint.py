@@ -178,6 +178,7 @@ def fill_order(order,txes):
 
     # No matching orders found, so insert new order and terminate
     if not matching_orders.first():
+        print('LEAVING FILL ORDER FUNCTION. NO MATCHING ORDERS')
         return
 
     # get first match
