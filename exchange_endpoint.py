@@ -187,6 +187,7 @@ def fill_order(order,txes):
     order.filled = timestamp
     first_match.filled = timestamp
     print("ORDER BEING FILLED NOW")
+    print(order.id)
     print(order.filled)
     #commit to set ID 
     g.session.commit()
