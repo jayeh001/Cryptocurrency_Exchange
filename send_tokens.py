@@ -70,7 +70,9 @@ def send_tokens_algo( acl, sender_sk, txes):
             print(txinfo)
             print(f"Sent {tx['amount']} microalgo in transaction: {tx_id}\n")
             tx['tx_id'] = tx_id
-            print("CURRENTLY IN SEND ALGO. the ORDER_ID is:", tx['order_id'])
+
+            checking_id = tx['order_id']
+            print(f"CURRENTLY IN SEND ALGO. the ORDER_ID is: {checking_id}")
             # add_to_tx_table(tx,tx_id)
         except Exception as e:
             import traceback

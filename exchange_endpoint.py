@@ -275,9 +275,12 @@ def add_to_tx_table(txes):
             order_id = tx['order_id'],
             tx_id = tx['tx_id']
         )
+        
+        print(f"INSIDE ADDING TO TX AND ORDER_ID IS: {new_tx_obj.order_id}")
         g.session.add(new_tx_obj)
         g.session.commit()
-        # checkboy = g.session.query(TX).filter(TX.order_id ==  )
+        checkboy = g.session.query(TX).filter(TX.order_id ==  tx['order_id'])
+        print(f'CHECKBOY IS {checkboy}')
 
 """ End of Helper methods"""
   
@@ -374,9 +377,9 @@ def trade():
         for check in checks:
             txcheck = g.session.query(TX).filter(TX.order_id == check.id)
             if not txcheck or txcheck.count() == 0:
-                print("##############################")
-                print(f"{check.id} was not put inside TX TABLE")
-                print("##############################")
+                # print("##############################")
+                # print(f"{check.id} was not put inside TX TABLE")
+                # print("##############################")
 
 
         # If all goes well, return jsonify(True). else return jsonify(False)
