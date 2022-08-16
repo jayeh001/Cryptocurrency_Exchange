@@ -203,7 +203,7 @@ def fill_order(order,txes):
     order_tx = create_txes(order)
     txes.append(first_match_tx)
     txes.append(order_tx)
-
+    g.session.commit()
 
     if order.buy_amount > first_match.sell_amount:
         child_order = Order(creator_id=order.id,sender_pk=order.sender_pk,
