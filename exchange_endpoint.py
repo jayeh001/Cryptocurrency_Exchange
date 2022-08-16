@@ -225,7 +225,12 @@ def create_txes(order):
     parameters = ["order_id", "platform", "receiver_pk", "amount"]
     #FIXME: platform might have to be buy_currency, and maybe buy_amount
     matches = [order.id, order.buy_currency, order.receiver_pk, order.buy_amount]
-    return dict(zip(parameters,matches))
+    print("THIS IS THE MATCHES IN CREATE_TX")
+    print(matches)
+    output = dict(zip(parameters,matches))
+    print('THIS IS TX OBJECT BEING CREATED')
+    print(output)
+    return output
     # return [order.id, order.sell_currency, order.receiver_pk, order.sell_amount]
 def execute_txes(txes):
     
@@ -261,8 +266,8 @@ def execute_txes(txes):
     print(g.session.query(TX).all())
 def add_to_tx_table(txes):
     for tx in txes:
-        print("WE ARE PRINTING TXES NOW")
-        print(tx)
+        # print("WE ARE PRINTING TXES NOW")
+        # print(tx)
         new_tx_obj = TX(
             platform = tx['platform'],
             receiver_pk = tx['receiver_pk'],
@@ -271,6 +276,7 @@ def add_to_tx_table(txes):
         )
         g.session.add(new_tx_obj)
         g.session.commit()
+        checkboy = g.session.query(TX).filter(TX.order_id ==  )
 
 """ End of Helper methods"""
   
@@ -359,6 +365,17 @@ def trade():
         final_txes = fill_order(order_obj,txes)
         # 4. Execute the transactions
         execute_txes(final_txes)
+        
+        #################################
+        checks = g.session.query(Order).filter(Order.filled != None)
+        for check in checks:
+            txcheck = g.session.query(TX).filter(TX.order_id == check.id)
+            if not txcheck or txcheck.count() == 0:
+                print("##############################")
+                print(f"{check.id} was not put inside TX TABLE")
+                print("##############################")
+
+
         # If all goes well, return jsonify(True). else return jsonify(False)
         return jsonify(True)
 
