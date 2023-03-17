@@ -13,7 +13,6 @@ import math
 import sys
 import traceback
 
-# TODO: make sure you implement connect_to_algo, send_tokens_algo, and send_tokens_eth
 from send_tokens import connect_to_algo, connect_to_eth, send_tokens_algo, send_tokens_eth
 
 from models import Base, Order, TX, Log
@@ -22,8 +21,7 @@ Base.metadata.bind = engine
 DBSession = sessionmaker(bind=engine)
 
 app = Flask(__name__)
-
-""" Pre-defined methods (do not need to change) """
+""" Pre-defined methods """
 
 @app.before_request
 def create_session():
@@ -84,7 +82,8 @@ def connect_to_blockchains():
         
 """ End of pre-defined methods """
         
-""" Helper Methods (skeleton code for you to implement) """
+""" Helper Methods """
+
 def check_sig(payload,sig):
     try:
         sender_pk = payload["sender_pk"]
@@ -103,18 +102,13 @@ def check_sig(payload,sig):
 
 def log_message(message_dict):
     msg = json.dumps(message_dict)
-
-    # TODO: Add message to the Log table
-    
     return
 
-def get_algo_keys():
-    
-    # TODO: Generate or read (using the mnemonic secret) 
+def get_algo_keys():   
+    # Generate or read (using the mnemonic secret) 
     # the algorand public/private keys
     algo_sk = "18ppT/MQyz7nvq4ipbIEAOqA5lKrv4M+J09iHKU9tsAgDtPesktIeJ/67fB2KDk9qyAEQ8Xu/IOsqB/xHOaTeg=="
-    algo_pk = "EAHNHXVSJNEHRH725XYHMKBZHWVSABCDYXXPZA5MVAP7CHHGSN5GXM2VWM"
-    
+    algo_pk = "EAHNHXVSJNEHRH725XYHMKBZHWVSABCDYXXPZA5MVAP7CHHGSN5GXM2VWM"    
     return algo_sk, algo_pk
 
 
@@ -123,52 +117,17 @@ def get_eth_keys(filename = "eth_mnemonic.txt"):
     eth_pk = "0x1BcA01B4E665FE11804b89A6e91d857D354aeC1F"  #eth address
     eth_sk = b'\xad\\\xcb\x84-\xc2\xbf\xc0\xb1d\xf5\x82\x8e\x18kT\x906#\xd5\xbc\xdf|[\xeeK\xad\xc1\xf4\x98\xf5\xd6' #secret key
 
-    # TODO: Generate or read (using the mnemonic secret) 
+    # Generate or read (using the mnemonic secret) 
     # the ethereum public/private keys
-
     return eth_sk, eth_pk
+
 def calc_new_sell_amount(curr_order, other_order):
     ratio = curr_order.sell_amount / curr_order.buy_amount
     print(ratio)
     return (curr_order.buy_amount - other_order.sell_amount) * ratio
     
-# def process_child(order):
-#     matches =  g.session.query(Order).filter(Order.buy_currency == order.sell_currency,
-#                             Order.sell_currency == order.buy_currency,
-#                             Order.filled == None,
-#                             (Order.sell_amount / Order.buy_amount) >= (order.buy_amount / order.sell_amount))
-#     g.session.add(order)
-#     if not matches.first():
-#         g.session.commit()
-#         return
-#     first_match = matches.first()
-#     timestamp = datetime.now()
-#     order.filled = timestamp
-#     first_match.filled = timestamp
-#     g.session.commit()
-#     first_match.counterparty_id = order.id
-#     order.counterparty_id = first_match.id
-#     g.session.commit()
-#     if order.buy_amount > first_match.sell_amount:
-#         child_order = Order(creator_id=order.id,sender_pk=order.sender_pk,
-#                     receiver_pk=order.receiver_pk, buy_currency=order.buy_currency, 
-#                     sell_currency=order.sell_currency, buy_amount=order.buy_amount - first_match.sell_amount, 
-#                     sell_amount=calc_new_sell_amount(order, first_match))     
-#         process_child(order)
-
-#     elif first_match.buy_amount > order.sell_amount:
-#         child_order = Order(creator_id=first_match.id,sender_pk=first_match.sender_pk,
-#         receiver_pk=first_match.receiver_pk, buy_currency=first_match.buy_currency, 
-#         sell_currency=first_match.sell_currency, 
-#         buy_amount=first_match.buy_amount - order.sell_amount, 
-#         sell_amount=calc_new_sell_amount(first_match, order)) 
-#         process_child(child_order)
   
 def fill_order(order,txes):
-    print('ENTERED FILL ORDER FUNCTION')
-    # order = Order(sender_pk=order['sender_pk'],receiver_pk=order['receiver_pk'], 
-    #                 buy_currency=order['buy_currency'], sell_currency=order['sell_currency'], 
-    #                 buy_amount=order['buy_amount'], sell_amount=order['sell_amount'])
     g.session.add(order)
     g.session.commit()
     matching_orders = g.session.query(Order).filter(Order.buy_currency == order.sell_currency,
@@ -178,13 +137,9 @@ def fill_order(order,txes):
 
     # No matching orders found, so insert new order and terminate
     if not matching_orders.first():
-        print('LEAVING FILL ORDER FUNCTION. NO MATCHING ORDERS')
-        print('printing txes below')
-        print(txes)
         return txes
 
     # get first match
-    
     first_match = matching_orders.first()
     timestamp = datetime.now()
     order.filled = timestamp
@@ -197,12 +152,7 @@ def fill_order(order,txes):
     order.counterparty_id = first_match.id
     first_match.counterparty_id = order.id
     g.session.commit()
-    # print(session.query(Order).all())
 
-    #FIXME: create execute order here 
-    # parameters = ["order_id", "platform", "receiver_pk", "amount"]
-    # first_match_tx = dict(zip(parameters, create_txes(first_match)))
-    # order_tx = dict(zip(parameters,create_txes(order)))
     first_match_tx = create_txes(first_match)
     order_tx = create_txes(order)
     txes.append(first_match_tx)
@@ -210,46 +160,31 @@ def fill_order(order,txes):
     g.session.commit()
 
     if order.buy_amount > first_match.sell_amount:
-        print('creating child order')
         child_order = Order(creator_id=order.id,sender_pk=order.sender_pk,
                     receiver_pk=order.receiver_pk, buy_currency=order.buy_currency, 
                     sell_currency=order.sell_currency, buy_amount=order.buy_amount - first_match.sell_amount, 
                     sell_amount=calc_new_sell_amount(order, first_match)) 
         return fill_order(child_order,txes)
-
+    
     elif first_match.buy_amount > order.sell_amount:
-        print('creating child order')
         child_order = Order(creator_id=first_match.id,sender_pk=first_match.sender_pk,
                         receiver_pk=first_match.receiver_pk, buy_currency=first_match.buy_currency, 
                         sell_currency=first_match.sell_currency, 
                         buy_amount=first_match.buy_amount - order.sell_amount, 
                         sell_amount=calc_new_sell_amount(first_match, order)) 
         return fill_order(child_order,txes)
-    
-    print('LEAVING FILL ORDER FUNCTION')
-    print('PRINTING TXes BELOW')
-    print(txes)
     return txes
-def create_txes(order):
-    print('ENTERED CREATE TX')
-    parameters = ["order_id", "platform", "receiver_pk", "amount"]
-    #FIXME: platform might have to be buy_currency, and maybe buy_amount
 
+def create_txes(order):
+    parameters = ["order_id", "platform", "receiver_pk", "amount"]
     matches = [order.id, order.buy_currency, order.receiver_pk, order.buy_amount]
-    # print("THIS IS THE MATCHES IN CREATE_TX")
-    # print(matches)
     output = dict(zip(parameters,matches))
-    print('THIS IS TX OBJECT BEING CREATED')
-    print(output)
     return output
-    # return [order.id, order.sell_currency, order.receiver_pk, order.sell_amount]
+
 def execute_txes(txes):
-    print('ENTERING EXECUTE TXES FUNCTION')
     if txes is None:
-        print('txes IS NONE')
         return True
     if len(txes) == 0:
-        print('TXES LENGTH IS 0')
         return True
     print( f"Trying to execute {len(txes)} transactions" )
     print( f"IDs = {[tx['order_id'] for tx in txes]}" )
@@ -263,25 +198,19 @@ def execute_txes(txes):
     algo_txes = [tx for tx in txes if tx['platform'] == "Algorand" ]
     eth_txes = [tx for tx in txes if tx['platform'] == "Ethereum" ]
 
-    # TODO: 
-    #       1. Send tokens on the Algorand and eth testnets, appropriately
-    #          We've provided the send_tokens_algo and send_tokens_eth skeleton methods in send_tokens.py
+    #       1. Send tokens on the Algorand and eth testnets
+    #          The send_tokens_algo and send_tokens_eth skeleton methods are in send_tokens.py
     #       2. Add all transactions to the TX table
     acl = connect_to_algo("algodclient")
     algo_txes = send_tokens_algo(acl, algo_sk, algo_txes)
     
     w3 = connect_to_eth()
     eth_txes = send_tokens_eth(w3,eth_sk,eth_txes)
-
     add_to_tx_table(algo_txes)
     add_to_tx_table(eth_txes)
-    # print("printing all TRANSACTIONS IN TX TABLE")
-    # print(g.session.query(TX).all())
+
 def add_to_tx_table(txes):
-    print('ENTERING ADD TO TX TABLE FUNCTION')
     for tx in txes:
-        # print("WE ARE PRINTING TXES NOW")
-        # print(tx)
         new_tx_obj = TX(
             platform = tx['platform'],
             receiver_pk = tx['receiver_pk'],
@@ -289,17 +218,12 @@ def add_to_tx_table(txes):
             tx_id = tx['tx_id']
         )
         
-        print(f"INSIDE ADDING TO TX AND ORDER_ID IS: {new_tx_obj.order_id}")
         g.session.add(new_tx_obj)
         g.session.commit()
-        checkboy = g.session.query(TX).filter(TX.order_id ==  tx['order_id'])
-        # print("type of tx")
-
-        # print(type(tx))
+        check = g.session.query(TX).filter(TX.order_id ==  tx['order_id'])
 
         theorderid = tx['order_id']
-        print(f'TX DATABASE RETURNED {checkboy.count()} order(s) that matchd txid: {theorderid}')
-
+        print(f'TX DATABASE RETURNED {check.count()} order(s) that matchd txid: {theorderid}')
 """ End of Helper methods"""
   
 @app.route('/address', methods=['POST'])
@@ -314,11 +238,9 @@ def address():
             return jsonify( f"Error: invalid platform provided: {content['platform']}"  )
         
         if content['platform'] == "Ethereum":
-            #Your code here
             eth_pk = "0x1BcA01B4E665FE11804b89A6e91d857D354aeC1F"
             return jsonify( eth_pk )
         if content['platform'] == "Algorand":
-            #Your code here
             algo_pk = "EAHNHXVSJNEHRH725XYHMKBZHWVSABCDYXXPZA5MVAP7CHHGSN5GXM2VWM"
             return jsonify( algo_pk )
 
@@ -350,7 +272,6 @@ def trade():
             print( json.dumps(content) )
             return jsonify( False )
         
-        # Your code here
         error = False
         if not check_sig(content['payload'], content['sig']):
             log_obj = Log(
@@ -364,9 +285,7 @@ def trade():
             print (json.dumps(content))
             return jsonify( False )
         # 1. Check the signature
-        
         # 2. Add the order to the table
-        
         order_obj = Order(
              sender_pk = content["payload"]["sender_pk"],
              receiver_pk = content["payload"]["receiver_pk"],
@@ -376,13 +295,6 @@ def trade():
              sell_amount = content["payload"]["sell_amount"],
              tx_id = content['payload']['tx_id']
         )
-        #FIXME: dunno if i actually implement this part
-        # 3a. Check if the order is backed by a transaction equal to the sell_amount (this is new)
-
-        # if order_obj.sell_currency  == "Ethereum":
-        #     tx = w3.eth.get_transaction(order_obj.tx_id)
-        #     if tx['to'] != get_eth_keys[1]:
-        #         return jsonify(False)
         g.session.add(order_obj)
         g.session.commit()
         txes = []
@@ -390,17 +302,6 @@ def trade():
         final_txes = fill_order(order_obj,txes)
         # 4. Execute the transactions
         execute_txes(final_txes)
-        
-        #################################
-        # checks = g.session.query(Order).filter(Order.filled != None)
-        # for check in checks:
-        #     txcheck = g.session.query(TX).filter(TX.order_id == check.id)
-        #     if not txcheck or txcheck.count() == 0:
-                # print("##############################")
-                # print(f"{check.id} was not put inside TX TABLE")
-                # print("##############################")
-
-
         # If all goes well, return jsonify(True). else return jsonify(False)
         print('##############################################################################')
         return jsonify(True)
@@ -408,12 +309,6 @@ def trade():
 @app.route('/order_book')
 
 def order_book():
-    """
-    FIXME:
-    return list of all orders in database. FORMAT as JSON
-    must contain tx_id of payment sent by MY server
-
-    """
     fields = [ "buy_currency", "sell_currency", "buy_amount", "sell_amount", "signature", "tx_id", "receiver_pk", "sender_pk" ]
     data = {}
     result = []
@@ -431,14 +326,7 @@ def order_book():
         }
         result.append(row)
     data["data"] = result
-    # print('THIS IS THE DATATTAAAAAAAA')
-    # print(data)
-    # print("asfwtf WTF ")
-    # print(result)
     return jsonify(data)
-
-    # Same as before
-    pass
 
 if __name__ == '__main__':
     app.run(port='5002')
